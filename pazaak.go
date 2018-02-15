@@ -22,8 +22,8 @@ type deck struct {
 type player struct {
 	name     string
 	sidedeck deck
-    hand     []card
-    score    int
+	hand     []card
+	score    int
 }
 
 func setupDealer() deck {
@@ -70,7 +70,7 @@ func dealCard(d *deck) (card, error) {
 
 func playerDeck(name string) deck {
 	_size := 10
-	d := deck {
+	d := deck{
 		name:  name,
 		size:  _size,
 		cards: make([]card, _size),
@@ -89,39 +89,39 @@ func playerDeck(name string) deck {
 }
 
 func dealHand(p *player) {
-    size := 10
-    c := make([]card, size) // Make a copy of the players deck
-    copy(c, p.sidedeck.cards)
+	size := 10
+	c := make([]card, size) // Make a copy of the players deck
+	copy(c, p.sidedeck.cards)
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
-    for i := 0; i < 4; i++ {
-        pos := r.Intn(size) // random card from deck
-        p.hand[i] = c[pos]
-        c = append(c[:pos], c[pos+1:]...) // remove the card
-        size--
-    }
+	for i := 0; i < 4; i++ {
+		pos := r.Intn(size) // random card from deck
+		p.hand[i] = c[pos]
+		c = append(c[:pos], c[pos+1:]...) // remove the card
+		size--
+	}
 }
 
 func main() {
 	dealerDeck := setupDealer()
-    p1 := player {
-        name: "player1",
-        sidedeck: playerDeck("p1Deck"),
-        hand:     make([]card, 4),
-        score: 0,
-    }
-    p2 := player {
-        name: "player2",
-        sidedeck: playerDeck("p2Deck"),
-        hand:     make([]card, 4),
-        score: 0,
-    }
+	p1 := player{
+		name:     "player1",
+		sidedeck: playerDeck("p1Deck"),
+		hand:     make([]card, 4),
+		score:    0,
+	}
+	p2 := player{
+		name:     "player2",
+		sidedeck: playerDeck("p2Deck"),
+		hand:     make([]card, 4),
+		score:    0,
+	}
 
 	fmt.Printf("game start\n")
-    dealHand(&p1)
-    dealHand(&p2)
-    fmt.Printf("%+v\n", p1)
-    fmt.Printf("%+v\n", p2)
+	dealHand(&p1)
+	dealHand(&p2)
+	fmt.Printf("%+v\n", p1)
+	fmt.Printf("%+v\n", p2)
 	for {
 		fmt.Printf("--- Begin turn ---\n")
 		c, err := dealCard(&dealerDeck)
