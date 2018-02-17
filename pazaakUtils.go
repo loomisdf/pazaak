@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -76,6 +77,16 @@ func DealCard(d *Deck) (Card, error) {
 	return c, nil
 }
 
+// TakeCard take a deck and player and simulates the player taking a card from the deck and consuming the point value
+func TakeCard(d *Deck, p *Player) (int, error) {
+	c, err := DealCard(d)
+	if err != nil {
+		return 0, errors.New("deck is empty")
+	}
+	p.score += c.value
+	return c.value, nil
+}
+
 // PlayerDeck returns a new deck with 10 cards.
 func PlayerDeck(name string) Deck {
 	_size := 10
@@ -95,6 +106,15 @@ func PlayerDeck(name string) Deck {
 	d.Cards[8] = Card{name: "+5", value: 5}
 	d.Cards[9] = Card{name: "+6", value: 6}
 	return d
+}
+
+// PrintHand prints the players hand to std out.
+func PrintHand(p *Player) {
+	fmt.Printf("hand: %s, %s, %s, %s\n",
+		p.hand[0].name,
+		p.hand[1].name,
+		p.hand[2].name,
+		p.hand[3].name)
 }
 
 // DealHand taks a player p and creates a hand with 4 cards from the player's sidedeck.

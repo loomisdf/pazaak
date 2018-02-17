@@ -14,3 +14,5 @@
 .glide/
 
 debug
+.idea
+.vscode/launch.json
