@@ -7,17 +7,22 @@ import (
 	"time"
 )
 
+// Card represents a single playing card.
 type Card struct {
 	name  string
 	value int
 }
 
+// Deck is a representation of a game play deck.
+//It consists of a set of cards and is used for
+//both the dealer and the players.
 type Deck struct {
 	name  string
 	size  int
 	Cards []Card
 }
 
+// Player represents a single player in the game of pazaak.
 type Player struct {
 	name     string
 	sidedeck Deck
@@ -26,6 +31,7 @@ type Player struct {
 	lastMove string
 }
 
+// SetupDealer returns the dealer deck with cards numbered 1-10 with 4 of each number.
 func SetupDealer() Deck {
 	_size := 40
 	d := Deck{
@@ -55,6 +61,8 @@ func SetupDealer() Deck {
 	return d
 }
 
+// DealCard take a Deck d and removes a random card and returns it.
+// DealCard returns an error if the deck is empty.
 func DealCard(d *Deck) (Card, error) {
 	if d.size == 0 {
 		return Card{}, errors.New("deck is empty")
@@ -68,6 +76,7 @@ func DealCard(d *Deck) (Card, error) {
 	return c, nil
 }
 
+// PlayerDeck returns a new deck with 10 cards.
 func PlayerDeck(name string) Deck {
 	_size := 10
 	d := Deck{
@@ -88,6 +97,7 @@ func PlayerDeck(name string) Deck {
 	return d
 }
 
+// DealHand taks a player p and creates a hand with 4 cards from the player's sidedeck.
 func DealHand(p *Player) {
 	size := 10
 	c := make([]Card, size) // Make a copy of the players deck
