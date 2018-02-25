@@ -10,6 +10,7 @@ import (
 type GameState struct {
 	p1Turn bool
 	state  string
+	winner string
 }
 
 var commands = map[string]string{
@@ -21,6 +22,15 @@ var commands = map[string]string{
 var gameState GameState
 var dealerDeck Deck
 var p1, p2 Player
+
+const maxScore = 20
+const gameOver = "game over"
+const stand = "stand"
+const endTurn = "end turn"
+const quit = "quit"
+const tieGame = "tie game"
+const p1Wins = "player 1 wins!"
+const p2Wins = "player 2 wins!"
 
 func init() {
 	reset()
@@ -47,6 +57,7 @@ func reset() {
 	gameState = GameState{
 		p1Turn: true,
 		state:  "game start",
+		winner: "",
 	}
 }
 
@@ -63,11 +74,11 @@ func ParseInput(input string) bool {
 	var status bool
 	if ok {
 		switch input {
-		case "end turn":
+		case endTurn:
 			status = true
-		case "stand":
+		case stand:
 			status = true
-		case "quit":
+		case quit:
 			os.Exit(0)
 		default:
 			status = false
@@ -79,37 +90,45 @@ func ParseInput(input string) bool {
 }
 
 func turn() {
-	if gameState.p1Turn && p1.lastMove != "stand" {
+	if gameState.p1Turn && p1.lastMove != stand {
 		// Player 1's turn
 		num, err := TakeCard(&dealerDeck, &p1)
 		if err != nil {
 			fmt.Printf("dealer's deck is empty\n")
 		} else {
 			fmt.Printf("P1 drew %d, score is %d\n", num, p1.score)
-			fmt.Printf("P1, what are you going to do?('end turn', 'stand', or 'quit')\n")
-			input := ReadInput()
-			for !ParseInput(input) {
-				fmt.Printf("invalid command\n")
-				input = ReadInput()
+			if p1.score == maxScore {
+				p1.lastMove = stand
+			} else {
+				fmt.Printf("P1, what are you going to do?('end turn', 'stand', or 'quit')\n")
+				input := ReadInput()
+				for !ParseInput(input) {
+					fmt.Printf("invalid command\n")
+					input = ReadInput()
+				}
+				fmt.Printf("p1 turn over\n")
+				p1.lastMove = input
 			}
-			fmt.Printf("p1 turn over\n")
-			p1.lastMove = input
 		}
-	} else if gameState.p1Turn == false && p2.lastMove != "stand" {
+	} else if gameState.p1Turn == false && p2.lastMove != stand {
 		// Player 2's turn
 		num, err := TakeCard(&dealerDeck, &p2)
 		if err != nil {
 			fmt.Printf("dealer's deck is empty\n")
 		} else {
 			fmt.Printf("P2 drew %d, score is %d\n", num, p2.score)
-			fmt.Printf("P2, what are you going to do?('end turn', 'stand', or 'quit')\n")
-			input := ReadInput()
-			for !ParseInput(input) {
-				fmt.Printf("invalid command\n")
-				input = ReadInput()
+			if p2.score == maxScore {
+				p2.lastMove = stand
+			} else {
+				fmt.Printf("P2, what are you going to do?('end turn', 'stand', or 'quit')\n")
+				input := ReadInput()
+				for !ParseInput(input) {
+					fmt.Printf("invalid command\n")
+					input = ReadInput()
+				}
+				fmt.Printf("p2 turn over\n")
+				p2.lastMove = input
 			}
-			fmt.Printf("p2 turn over\n")
-			p2.lastMove = input
 		}
 	}
 	if gameState.p1Turn {
@@ -119,16 +138,36 @@ func turn() {
 	}
 }
 
+func evalGameState() {
+	if p1.score > maxScore {
+		gameState.winner = p2Wins
+		gameState.state = gameOver
+	} else if p2.score > maxScore {
+		gameState.winner = p1Wins
+		gameState.state = gameOver
+	} else if p1.lastMove == stand && p2.lastMove == stand {
+		if p1.score == p2.score {
+			gameState.winner = tieGame
+		} else if p1.score > p2.score {
+			gameState.winner = p1Wins
+		} else {
+			gameState.winner = p2Wins
+		}
+		gameState.state = gameOver
+	}
+}
+
 func main() {
 	fmt.Printf("game start\n")
 	for {
 		fmt.Printf("--- Begin turn ---\n")
 		fmt.Printf("p1 score: %d --- p2 score: %d\n", p1.score, p2.score)
 		turn()
-		if gameState.state == "game over" {
+		evalGameState()
+		if gameState.state == gameOver {
+			fmt.Printf(gameState.winner)
 			break
 		}
 		fmt.Printf("--- End turn ---\n")
 	}
-	fmt.Printf("game end\n")
 }
